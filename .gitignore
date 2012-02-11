@@ -1,0 +1,6 @@
+/nbproject/private/
+/nbproject/
+*.log
+*.status
+fcgircd
+/autom4te.cache/

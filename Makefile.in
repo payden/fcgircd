@@ -1,0 +1,4 @@
+all:
+	gcc -o fcgircd fcgircd.c -lfcgi
+
+clean: rm -f *.o fcgircd
