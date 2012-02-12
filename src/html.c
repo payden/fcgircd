@@ -1,11 +1,8 @@
 #include "fcgircd.h"
 
-void do_index(char *query_string) {
-    char *test = get_cookie("uid");
+void do_index(struct fcgircd_state *state, char *query_string) {
     print_file(HEADER_PATH);
-    if(test!=NULL) {
-        printf("Cookie uid: %s<br>Cookie count: %d\n",test,cookie_count);
-        free(test);
-    }
+    //now we have state struct..  which will certainly evolve as we go.
+    //Right now it's just state->connected = bool and state->uid = unique id per visitor.
     print_file(FOOTER_PATH);
 }

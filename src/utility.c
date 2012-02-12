@@ -3,6 +3,29 @@
 #include "fcgircd.h"
 
 
+void save_state_to_memcached(struct memcached_st *mem, struct fcgircd_state *state) {
+    memcached_return_t err;
+    err = memcached_set(mem, state->uid, strlen(state->uid), (char *)state, sizeof(struct fcgircd_state),0,0);
+    if(err != MEMCACHED_SUCCESS) {
+        syslog(LOG_NOTICE, "Error saving state to memcached: %s.  Exiting...\n", memcached_strerror(mem, err));
+        exit(1);
+    }
+}
+
+struct fcgircd_state *populate_state_from_memcached(struct memcached_st *mem, char *uid) {
+    size_t value_length;
+    memcached_return_t err;
+    uint32_t flags;
+    struct fcgircd_state *state = NULL;
+    state = (struct fcgircd_state *)memcached_get(mem, uid, strlen(uid), &value_length, &flags, &err);
+    if(err == MEMCACHED_NOTFOUND) {
+        state = (struct fcgircd_state *)malloc(sizeof(struct fcgircd_state));
+        state->connected = FCGIRCD_FALSE;
+        strncpy(state->uid, uid, strlen(uid));
+    }
+    return state;
+}
+
 char *generate_uid(void) {
     struct timeval tv;
     unsigned int seed;
@@ -106,18 +129,13 @@ void set_cookie(char *name, char *value) {
     free(set_cookie_str);
 }
 
-void set_on_empty_identifier(void) {
+char *set_on_empty_identifier(void) {
     char *uid_cookie = NULL;
-    char *generated_uid = NULL;
     if((uid_cookie = get_cookie(UID_COOKIE))==NULL) {
-        generated_uid = generate_uid();
-        set_cookie(UID_COOKIE, generated_uid);
-        free(generated_uid);
+        uid_cookie = generate_uid();
+        set_cookie(UID_COOKIE, uid_cookie);
     }
-    else {
-        //Found unique id, just free it for now.
-        free(uid_cookie);
-    }
+    return uid_cookie;
 }
 
 void print_file(char *path) {
@@ -176,7 +194,7 @@ void output_headers(void) {
     printf("%s\n",response_headers);
 }
 
-void route_request() {
+void route_request(struct fcgircd_state *state) {
     char *envuri = getenv("REQUEST_URI");
     char *uri = (char *)malloc(sizeof(char)*strlen(envuri)+1);
     char *query_string = NULL;
@@ -194,21 +212,21 @@ void route_request() {
         query_string++;
     }
     if(strcmp(uri,"/") == 0 || strcmp(uri,"/index.html") == 0) {
-        do_index(query_string);
+        do_index(state, query_string);
     }
     free(uri);
 }
 
-void init_memcached(memcached_st *mem) {
+void init_memcached(memcached_st **mem) {
     const char memcached_server[] = "127.0.0.1";
     in_port_t memcached_port = 11211;
     memcached_return_t ret;
-    mem = memcached_create(NULL);
-    if(mem == NULL) {
+    *mem = memcached_create(NULL);
+    if(*mem == NULL) {
         fprintf(stderr, "Unable to create memcached_st.  Exiting...\n");
         exit(1);
     }
-    ret = memcached_server_add(mem, memcached_server, memcached_port);
+    ret = memcached_server_add(*mem, memcached_server, memcached_port);
     if(ret != MEMCACHED_SUCCESS) {
         fprintf(stderr, "Unable to connect to memcached server on %s:%d.  Exiting...\n",memcached_server,memcached_port);
         exit(1);
