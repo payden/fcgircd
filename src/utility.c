@@ -34,7 +34,7 @@ void route_request() {
         query_string++;
     }
     if(strcmp(uri,"/") == 0 || strcmp(uri,"/index.html") == 0) {
-        do_index(uri, query_string);
+        do_index(query_string);
     }
     free(uri);
 }

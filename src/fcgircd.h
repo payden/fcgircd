@@ -30,7 +30,7 @@ extern "C" {
     void print_file(char *path);
     void route_request(void);
     void output_headers(void);
-    void do_index(char *uri, char *query_string);
+    void do_index(char *query_string);
 
 
 #ifdef	__cplusplus
