@@ -7,3 +7,5 @@ fcgircd
 *.o
 /autom4te.cache/
 /.deps/
+configure
+Makefile

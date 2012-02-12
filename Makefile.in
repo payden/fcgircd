@@ -50,7 +50,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_fcgircd_OBJECTS = fcgircd.$(OBJEXT) utility.$(OBJEXT)
+am_fcgircd_OBJECTS = fcgircd.$(OBJEXT) utility.$(OBJEXT) \
+	html.$(OBJEXT)
 fcgircd_OBJECTS = $(am_fcgircd_OBJECTS)
 fcgircd_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -159,7 +160,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-fcgircd_SOURCES = src/fcgircd.h src/fcgircd.c src/utility.c
+fcgircd_SOURCES = src/fcgircd.h src/fcgircd.c src/utility.c src/html.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -264,6 +265,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcgircd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/html.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utility.Po@am__quote@
 
 .c.o:
@@ -307,6 +309,20 @@ utility.obj: src/utility.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/utility.c' object='utility.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utility.obj `if test -f 'src/utility.c'; then $(CYGPATH_W) 'src/utility.c'; else $(CYGPATH_W) '$(srcdir)/src/utility.c'; fi`
+
+html.o: src/html.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT html.o -MD -MP -MF $(DEPDIR)/html.Tpo -c -o html.o `test -f 'src/html.c' || echo '$(srcdir)/'`src/html.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/html.Tpo $(DEPDIR)/html.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/html.c' object='html.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o html.o `test -f 'src/html.c' || echo '$(srcdir)/'`src/html.c
+
+html.obj: src/html.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT html.obj -MD -MP -MF $(DEPDIR)/html.Tpo -c -o html.obj `if test -f 'src/html.c'; then $(CYGPATH_W) 'src/html.c'; else $(CYGPATH_W) '$(srcdir)/src/html.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/html.Tpo $(DEPDIR)/html.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/html.c' object='html.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o html.obj `if test -f 'src/html.c'; then $(CYGPATH_W) 'src/html.c'; else $(CYGPATH_W) '$(srcdir)/src/html.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
