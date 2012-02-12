@@ -11,11 +11,15 @@ int main(void) {
     
     
     while (FCGI_Accept() >= 0) {
+        init_cookies();
+        init_response_headers();
+        set_on_empty_identifier();
         output_headers();
         route_request();
+        free_cookies();
+        free(response_headers);
     }
-    
-    closelog();
     memcached_free(mem);
+    closelog();
     return 0;
 }
