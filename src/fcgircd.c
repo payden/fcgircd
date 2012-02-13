@@ -14,7 +14,6 @@ int main(void) {
         init_response_headers();
         current_uid = set_on_empty_identifier();
         state = populate_state_from_memcached(mem, current_uid);
-        output_headers();
         route_request(state);
         save_state_to_memcached(mem, state);
         free_cookies();

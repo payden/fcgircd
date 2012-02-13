@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "fcgircd.h"
 
@@ -139,17 +140,20 @@ char *set_on_empty_identifier(void) {
 }
 
 void print_file(char *path) {
-    char out_buf[OUTPUT_BUFFER_LENGTH];
+    char ch;
+    struct stat st;
+    int x = 0;
     FILE *fp = NULL;
+    stat(path,&st);
     fp = fopen(path, "r");
     if(fp == NULL) {
         printf("Unable to open file in print_file: %s\n",path);
         exit(1);
     }
-    while(!feof(fp)) {
-        memset(&out_buf,'\0',OUTPUT_BUFFER_LENGTH);
-        fread(&out_buf, OUTPUT_BUFFER_LENGTH-1, 1, fp);
-        printf("%s",out_buf);
+    while(x < st.st_size) {
+        ch = getc(fp);
+        putc(ch, stdout);
+        x++;
     }
     fclose(fp);
 }
@@ -178,8 +182,14 @@ void add_response_header(char *header) {
     strncat(response_headers, header, strlen(header));
 }
 
+void set_content_type(char *content_type) {
+    char buf[64];
+    snprintf(buf, 64, "Content-Type: %s\n", content_type);
+    syslog(LOG_NOTICE, "adding header: %s",buf);
+    add_response_header(buf);
+}
+
 void init_response_headers() {
-    const char *content_type_header = "Content-type: text/html\n";
     response_headers = (char *)malloc(sizeof(char)*INITIAL_HEADER_LENGTH);
     if(response_headers == NULL) {
         syslog(LOG_NOTICE, "Unable to allocate memory for response headers.  Exiting..\n");
@@ -187,7 +197,6 @@ void init_response_headers() {
     }
     memset(response_headers,'\0',INITIAL_HEADER_LENGTH);
     response_headers_sz = INITIAL_HEADER_LENGTH;
-    strncpy(response_headers,content_type_header,strlen(content_type_header));
 }
 
 void output_headers(void) {
@@ -212,7 +221,24 @@ void route_request(struct fcgircd_state *state) {
         query_string++;
     }
     if(strcmp(uri,"/") == 0 || strcmp(uri,"/index.html") == 0) {
+        set_content_type(TEXT_HTML);
+        output_headers();
         do_index(state, query_string);
+    }
+    if(strcmp(uri,FCGIRCD_JS)==0) {
+        set_content_type(TEXT_JAVASCRIPT);
+        output_headers();
+        print_file(FCGIRCD_JS_PATH);
+    }
+    if(strcmp(uri,FCGIRCD_CSS)==0) {
+        set_content_type(TEXT_CSS);
+        output_headers();
+        print_file(FCGIRCD_CSS_PATH);
+    }
+    if(strcmp(uri,FCGIRCD_LOGO)==0) {
+        set_content_type(IMAGE_PNG);
+        output_headers();
+        print_file(FCGIRCD_LOGO_PATH);
     }
     free(uri);
 }

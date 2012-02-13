@@ -17,11 +17,23 @@
 #define PROGRAM_NAME "fcgircd"
 #define FCGIRCD_FALSE 0
 #define FCGIRCD_TRUE 1
-#define TEMPLATE_DIR "templates/"
+#define TEXT_HTML "text/html"
+#define TEXT_JAVASCRIPT "text/javascript"
+#define TEXT_CSS "text/css"
+#define IMAGE_PNG "image/png"
+#define TEMPLATE_DIR "templates"
 #define HEADER_PATH TEMPLATE_DIR HEADER_HTML
 #define FOOTER_PATH TEMPLATE_DIR FOOTER_HTML
-#define HEADER_HTML "header.html"
-#define FOOTER_HTML "footer.html"
+#define FCGIRCD_CSS_PATH TEMPLATE_DIR FCGIRCD_CSS
+#define FCGIRCD_JS_PATH TEMPLATE_DIR FCGIRCD_JS
+#define FCGIRCD_LOGO_PATH TEMPLATE_DIR FCGIRCD_LOGO
+#define CONNECT_FORM_PATH TEMPLATE_DIR CONNECT_FORM_HTML
+#define HEADER_HTML "/header.html"
+#define FOOTER_HTML "/footer.html"
+#define FCGIRCD_CSS "/fcgircd.css"
+#define FCGIRCD_JS "/fcgircd.js"
+#define FCGIRCD_LOGO "/logo.png"
+#define CONNECT_FORM_HTML "/connect_form.html"
 #define OUTPUT_BUFFER_LENGTH 1024
 #define INITIAL_HEADER_LENGTH 512
 #define UID_COOKIE "uid"

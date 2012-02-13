@@ -1,0 +1,35 @@
+root { 
+    display: block;
+    margin: 0px;
+    padding: 0px;
+}
+.logo_img {border:0px;}
+#connect_box {
+    color: #ffffff;
+    background-color: #2a4480;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    width:400px;
+    margin: 0 auto;
+    padding: 10px;
+}
+#connect_box label {
+    font-weight: bold;
+    float: left;
+}
+#connect_btn_container {
+    width: 100%;
+    margin: 0 auto;
+}
+#connect_btn {
+    float: right;
+    margin: 10px 0 0 0;
+}
+
+.connect_input {
+    width: 300px;
+    float:right;
+}
+.clear {clear:both;}
