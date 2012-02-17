@@ -9,3 +9,4 @@ fcgircd
 /.deps/
 configure
 Makefile
+config.h

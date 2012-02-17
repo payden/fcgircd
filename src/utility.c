@@ -1,8 +1,66 @@
+#include <jansson.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
 #include "fcgircd.h"
 
+
+
+void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state) {
+    json_t *json_obj = NULL;
+    json_t *json_status = NULL;
+    char *json_as_string = NULL;
+    char *request_method = NULL;
+    char *content_length = NULL;
+    json_obj = json_object();
+    if(json_obj == NULL) {
+        syslog(LOG_NOTICE, "Unable to get JSON object, exiting..");
+        exit(1);
+    }
+    request_method = getenv("REQUEST_METHOD");
+    content_length = getenv("HTTP_CONTENT_LENGTH");
+    //request method has already been checked for a null value and would have exited, safe to dereference
+    if(strcmp(request_method,"POST")!=0) {
+        json_status = json_string("Request method not allowed");
+        if(json_object_set(json_obj,"status", json_status)) {
+            syslog(LOG_NOTICE, "Unable to json_object_set(), exiting..");
+            exit(1);
+        }
+        json_as_string = json_dumps(json_obj,0);
+        json_decref(json_status);
+        json_decref(json_obj);
+        set_content_type(APPLICATION_JSON);
+        output_headers();
+        printf("%s", json_as_string);
+        free(json_as_string);
+    }
+    if(!content_length || strcmp(content_length,"0")==0) {
+        json_status = json_string("Content length of zero not allowed");
+        if(json_object_set(json_obj, "status", json_status)) {
+            syslog(LOG_NOTICE, "Unable to json_object_set(), exiting..");
+            exit(1);
+        }
+        json_as_string = json_dumps(json_obj, 0);
+        json_decref(json_status);
+        json_decref(json_obj);
+        set_content_type(APPLICATION_JSON);
+        output_headers();
+        printf("%s", json_as_string);
+        free(json_as_string);
+    }
+    json_status = json_string("OK");
+    if(json_object_set(json_obj, "status", json_status)) {
+        syslog(LOG_NOTICE, "Unable to json_object_set(), exiting..");
+        exit(1);
+    }
+    json_as_string = json_dumps(json_obj, 0);
+    json_decref(json_status);
+    json_decref(json_obj);
+    set_content_type(APPLICATION_JSON);
+    output_headers();
+    printf("%s", json_as_string);
+    free(json_as_string);
+}
 
 void save_state_to_memcached(struct memcached_st *mem, struct fcgircd_state *state) {
     memcached_return_t err;
@@ -203,10 +261,20 @@ void output_headers(void) {
     printf("%s\n",response_headers);
 }
 
-void route_request(struct fcgircd_state *state) {
+void route_request(struct memcached_st *mem, struct fcgircd_state *state) {
     char *envuri = getenv("REQUEST_URI");
-    char *uri = (char *)malloc(sizeof(char)*strlen(envuri)+1);
+    char *request_method = getenv("REQUEST_METHOD");
+    char *uri = NULL;
     char *query_string = NULL;
+    if(request_method == NULL) {
+        set_content_type(TEXT_HTML);
+        output_headers();
+        print_file(HEADER_PATH);
+        printf("<h1>Bad Request</h1><div>No request method set.</div>\n");
+        print_file(FOOTER_PATH);
+        exit(1);
+    }
+    uri = (char *)malloc(sizeof(char)*strlen(envuri)+1);
     if(uri == NULL) {
         syslog(LOG_NOTICE, "Unable to allocate memory for request URI.  Dying.");
         exit(1);
@@ -224,6 +292,15 @@ void route_request(struct fcgircd_state *state) {
         set_content_type(TEXT_HTML);
         output_headers();
         do_index(state, query_string);
+        return;
+    }
+    if(strcmp(uri,JSON_POST)==0) {
+        handle_json_post(mem, state);
+    }
+    if(strcmp(uri,EMBER_JS)==0) {
+        set_content_type(TEXT_JAVASCRIPT);
+        output_headers();
+        print_file(EMBER_JS_PATH);
     }
     if(strcmp(uri,FCGIRCD_JS)==0) {
         set_content_type(TEXT_JAVASCRIPT);

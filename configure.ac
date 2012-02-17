@@ -13,7 +13,7 @@ AC_PROG_CC
 # Checks for libraries.
 AC_CHECK_LIB([memcached],[memcached_create],[],[AC_MSG_ERROR([libmemcached is required])])
 AC_CHECK_LIB([fcgi],[FCGI_Accept],[],[AC_MSG_ERROR([libfcgi is required])])
-
+AC_CHECK_LIB([jansson],[json_array],[],[AC_MSG_ERROR([jansson is required])])
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.

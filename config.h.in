@@ -3,6 +3,9 @@
 /* Define to 1 if you have the `fcgi' library (-lfcgi). */
 #undef HAVE_LIBFCGI
 
+/* Define to 1 if you have the `jansson' library (-ljansson). */
+#undef HAVE_LIBJANSSON
+
 /* Define to 1 if you have the `memcached' library (-lmemcached). */
 #undef HAVE_LIBMEMCACHED
 

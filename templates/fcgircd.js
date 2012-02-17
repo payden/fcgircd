@@ -3,12 +3,20 @@ $(document).ready(function() {
         $("#nickname").focus();
         $("#connect_box").keypress(function(e) {
            if(e.keyCode == 13) {
-               //TODO: make sure event target is not an enter fired on the button which would cause two 'clicks'
-               $("#connect_btn").trigger('click');
+               var id = e.target.id;
+               if(id != "connect_btn") {
+                   $("#connect_btn").trigger('click');
+               }
            }
         });
         $("#connect_btn").click(function() {
-            console.log("Fire connect.");
+            var data = "";
+            data += "nickname=" + encodeURI($("#nickname").val());
+            data += "&hostname=" + encodeURI($("#hostname").val());
+            data += "&port=" + encodeURI($("#port").val());
+            $.post("http://"+location.host+"/json", data, function(resp) {
+                var json_response = $.parseJSON(resp);
+            });
         })
     }
 });

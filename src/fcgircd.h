@@ -11,26 +11,32 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libmemcached/memcached.h>
+#include <sys/epoll.h>
 #include <fcgi_stdio.h>
 #include <syslog.h>
 
+#define MAX_EVENTS 100
 #define PROGRAM_NAME "fcgircd"
 #define FCGIRCD_FALSE 0
 #define FCGIRCD_TRUE 1
 #define TEXT_HTML "text/html"
 #define TEXT_JAVASCRIPT "text/javascript"
 #define TEXT_CSS "text/css"
+#define APPLICATION_JSON "application/json"
 #define IMAGE_PNG "image/png"
 #define TEMPLATE_DIR "templates"
 #define HEADER_PATH TEMPLATE_DIR HEADER_HTML
 #define FOOTER_PATH TEMPLATE_DIR FOOTER_HTML
 #define FCGIRCD_CSS_PATH TEMPLATE_DIR FCGIRCD_CSS
+#define EMBER_JS_PATH TEMPLATE_DIR EMBER_JS
 #define FCGIRCD_JS_PATH TEMPLATE_DIR FCGIRCD_JS
 #define FCGIRCD_LOGO_PATH TEMPLATE_DIR FCGIRCD_LOGO
 #define CONNECT_FORM_PATH TEMPLATE_DIR CONNECT_FORM_HTML
 #define HEADER_HTML "/header.html"
 #define FOOTER_HTML "/footer.html"
 #define FCGIRCD_CSS "/fcgircd.css"
+#define JSON_POST "/json"
+#define EMBER_JS "/ember-0.9.4.min.js"
 #define FCGIRCD_JS "/fcgircd.js"
 #define FCGIRCD_LOGO "/logo.png"
 #define CONNECT_FORM_HTML "/connect_form.html"
@@ -64,18 +70,20 @@ extern "C" {
     char *generate_uid(void);
     char *get_cookie(char *cookie_name);
     char *set_on_empty_identifier(void);
+    void init_epoll(int *epfd, struct epoll_event **events);
     void init_cookies(void);
     void free_cookies(void);
+    void set_content_type(char *content_type);
     void add_response_header(char *header);
     void set_cookie(char *name, char *value);
     void set_on_empty_identifer(void);
     void init_response_headers(void);
     void init_memcached(memcached_st **mem);
     void print_file(char *path);
-    void route_request(struct fcgircd_state *state);
+    void route_request(struct memcached_st *mem, struct fcgircd_state *state);
     void output_headers(void);
     void do_index(struct fcgircd_state *state, char *query_string);
-
+    void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state);
 
 #ifdef	__cplusplus
 }

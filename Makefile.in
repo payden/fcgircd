@@ -51,7 +51,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_fcgircd_OBJECTS = fcgircd.$(OBJEXT) utility.$(OBJEXT) \
-	html.$(OBJEXT)
+	html.$(OBJEXT) event.$(OBJEXT) net.$(OBJEXT)
 fcgircd_OBJECTS = $(am_fcgircd_OBJECTS)
 fcgircd_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -160,7 +160,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-fcgircd_SOURCES = src/fcgircd.h src/fcgircd.c src/utility.c src/html.c
+fcgircd_SOURCES = src/fcgircd.h src/fcgircd.c src/utility.c src/html.c src/event.c src/net.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -264,8 +264,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcgircd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/html.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utility.Po@am__quote@
 
 .c.o:
@@ -323,6 +325,34 @@ html.obj: src/html.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/html.c' object='html.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o html.obj `if test -f 'src/html.c'; then $(CYGPATH_W) 'src/html.c'; else $(CYGPATH_W) '$(srcdir)/src/html.c'; fi`
+
+event.o: src/event.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT event.o -MD -MP -MF $(DEPDIR)/event.Tpo -c -o event.o `test -f 'src/event.c' || echo '$(srcdir)/'`src/event.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/event.Tpo $(DEPDIR)/event.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/event.c' object='event.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o event.o `test -f 'src/event.c' || echo '$(srcdir)/'`src/event.c
+
+event.obj: src/event.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT event.obj -MD -MP -MF $(DEPDIR)/event.Tpo -c -o event.obj `if test -f 'src/event.c'; then $(CYGPATH_W) 'src/event.c'; else $(CYGPATH_W) '$(srcdir)/src/event.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/event.Tpo $(DEPDIR)/event.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/event.c' object='event.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o event.obj `if test -f 'src/event.c'; then $(CYGPATH_W) 'src/event.c'; else $(CYGPATH_W) '$(srcdir)/src/event.c'; fi`
+
+net.o: src/net.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT net.o -MD -MP -MF $(DEPDIR)/net.Tpo -c -o net.o `test -f 'src/net.c' || echo '$(srcdir)/'`src/net.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/net.Tpo $(DEPDIR)/net.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/net.c' object='net.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o net.o `test -f 'src/net.c' || echo '$(srcdir)/'`src/net.c
+
+net.obj: src/net.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT net.obj -MD -MP -MF $(DEPDIR)/net.Tpo -c -o net.obj `if test -f 'src/net.c'; then $(CYGPATH_W) 'src/net.c'; else $(CYGPATH_W) '$(srcdir)/src/net.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/net.Tpo $(DEPDIR)/net.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/net.c' object='net.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o net.obj `if test -f 'src/net.c'; then $(CYGPATH_W) 'src/net.c'; else $(CYGPATH_W) '$(srcdir)/src/net.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
