@@ -14,7 +14,7 @@ int main(void) {
     	int ret, i, current_fd;
     	while((ret = epoll_wait(epfd, epoll_events, MAX_EVENTS, 100)) >= 0) {
     		if(ret == 0) {
-    			syslog(LOG_NOTICE, "Value of shared parent_exited: %d", shared->parent_exited);
+    			//no events
     		}
     		else {
     			for(i=0;i<ret;i++) {
