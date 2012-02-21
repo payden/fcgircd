@@ -146,7 +146,7 @@ int do_action_connect(char *data, struct fcgircd_state *state) {
 			free(port);
 		return -1;
 	}
-	//Do action connect and update state->connected
+	attempt_connection(hostname, port, state);
 	free(hostname);
 	free(port);
 	return 1;

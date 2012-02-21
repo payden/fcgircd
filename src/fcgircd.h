@@ -85,6 +85,7 @@ extern "C" {
     char *set_on_empty_identifier(void);
     int get_action(char *input_data);
     int do_action_connect(char *input_data, struct fcgircd_state *state);
+    void attempt_connection(char *host, char *port, struct fcgircd_state *state);
     void init_epoll(int *epfd);
     void init_shared_mem(void);
     void init_cookies(void);
