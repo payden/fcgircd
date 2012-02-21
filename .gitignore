@@ -10,3 +10,5 @@ fcgircd
 configure
 Makefile
 config.h
+.cproject
+.project

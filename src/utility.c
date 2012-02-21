@@ -1,9 +1,33 @@
 #include <jansson.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "fcgircd.h"
 
+void fcgircd_cleanup(int signal) {
+	shared->parent_exited = 1;
+	exit(1);
+}
+
+void init_shared_mem(void) {
+	size_t shmsz;
+	shmsz = sizeof(struct fcgircd_shared);
+    int shmid;
+    key_t key;
+    key = ftok("/tmp/ftok", 'a');
+    shmid = shmget(key, shmsz, 0600 | IPC_CREAT);
+    if(shmid == -1) {
+    	syslog(LOG_NOTICE, "Unable to acquire shared memory segment with shmget: %s", strerror(errno));
+    	exit(1);
+    }
+    shared = shmat(shmid, (void *)0, 0);
+    if((char *)shared == (char *)-1) {
+        syslog(LOG_NOTICE, "Unable to attach to shared memory segment with shmat");
+        exit(1);
+    }
+    memset(shared, 0, sizeof(*shared));
+}
 
 
 void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state) {
@@ -12,6 +36,9 @@ void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state) {
     char *json_as_string = NULL;
     char *request_method = NULL;
     char *content_length = NULL;
+    char *input_data = NULL;
+    int content_len = 0;
+    int action = 0;
     json_obj = json_object();
     if(json_obj == NULL) {
         syslog(LOG_NOTICE, "Unable to get JSON object, exiting..");
@@ -19,6 +46,7 @@ void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state) {
     }
     request_method = getenv("REQUEST_METHOD");
     content_length = getenv("HTTP_CONTENT_LENGTH");
+    content_len = atoi(content_length);
     //request method has already been checked for a null value and would have exited, safe to dereference
     if(strcmp(request_method,"POST")!=0) {
         json_status = json_string("Request method not allowed");
@@ -48,18 +76,109 @@ void handle_json_post(struct memcached_st *mem, struct fcgircd_state *state) {
         printf("%s", json_as_string);
         free(json_as_string);
     }
-    json_status = json_string("OK");
-    if(json_object_set(json_obj, "status", json_status)) {
-        syslog(LOG_NOTICE, "Unable to json_object_set(), exiting..");
-        exit(1);
-    }
-    json_as_string = json_dumps(json_obj, 0);
-    json_decref(json_status);
-    json_decref(json_obj);
+    input_data = (char *)malloc(content_len+1);
+    memset(input_data, 0, content_len+1);
+    fread(input_data, content_len, 1, stdin);
+    action = get_action(input_data);
     set_content_type(APPLICATION_JSON);
     output_headers();
-    printf("%s", json_as_string);
-    free(json_as_string);
+    switch(action) {
+    	case ACTION_CONNECT:
+    		if(do_action_connect(input_data, state)==-1) {
+    			json_status = json_string("Unable to connect");
+    			if(json_object_set(json_obj, "status", json_status)) {
+    				syslog(LOG_NOTICE, "Unable to json_object_set, exiting..");
+    				exit(1);
+    			}
+    			json_as_string = json_dumps(json_obj, 0);
+    			json_decref(json_status);
+    			json_decref(json_obj);
+    			printf("%s",json_as_string);
+    			free(json_as_string);
+    			break;
+    		}
+    		json_status = json_string("OK");
+    		if(json_object_set(json_obj, "status", json_status)) {
+    			syslog(LOG_NOTICE, "Unable to json_object_set, exiting..");
+    			exit(1);
+    		}
+    		json_as_string = json_dumps(json_obj, 0);
+    		json_decref(json_status);
+    		json_decref(json_obj);
+    		printf("%s", json_as_string);
+    		free(json_as_string);
+    		break;
+    	case ACTION_UNKNOWN:
+    	default:
+    		json_status = json_string("Unknown action");
+    		if(json_object_set(json_obj, "status", json_status)) {
+    			syslog(LOG_NOTICE, "Unable to json_object_set, exiting..");
+    			exit(1);
+    		}
+    		json_as_string = json_dumps(json_obj, 0);
+    		json_decref(json_status);
+    		json_decref(json_obj);
+    		printf("%s", json_as_string);
+    		free(json_as_string);
+    		break;
+    }
+    free(input_data);
+}
+
+int do_action_connect(char *data, struct fcgircd_state *state) {
+	char *hostname = NULL, *port = NULL, *tok = NULL, *tmp = NULL, *tmp_key = NULL, *tmp_val = NULL;
+	for(tok=strtok(data,"&");tok!=NULL;tok=strtok(NULL,"&")) {
+		tmp = strdup(tok);
+		tmp_key = strchr(tmp,'=');
+		memset(tmp_key,'\0',1);
+		if(strcmp("hostname",tmp)==0) {
+			hostname = strdup(tmp_key+1);
+		}
+		if(strcmp("port",tmp)==0) {
+			port = strdup(tmp_key+1);
+		}
+		free(tmp);
+	}
+	if(hostname == NULL || port == NULL) {
+		if(hostname != NULL )
+			free(hostname);
+		if(port != NULL)
+			free(port);
+		return -1;
+	}
+	//Do action connect and update state->connected
+	free(hostname);
+	free(port);
+	return 1;
+
+
+}
+
+int get_action(char *input_data) {
+	char *tok = NULL, *param = NULL, *action = NULL, *real_action = NULL, *data = NULL;
+	data = strdup(input_data);
+	for(tok=strtok(data, "&");tok!=NULL;tok=strtok(NULL, "&")) {
+		param = strdup(tok);
+		action = strchr(param, '=');
+		if(action != NULL) {
+			memset(action,'\0',1);
+			if(strcmp("action",param)==0) {
+				action = action + 1;
+				real_action = strdup(action);
+			}
+		}
+		free(param);
+	}
+	if(real_action != NULL) {
+		if(strcmp(real_action, "connect")==0) {
+			free(real_action);
+			free(data);
+			return ACTION_CONNECT;
+		}
+		free(data);
+		free(real_action);
+	}
+	return ACTION_UNKNOWN;
 }
 
 void save_state_to_memcached(struct memcached_st *mem, struct fcgircd_state *state) {

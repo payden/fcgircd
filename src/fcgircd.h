@@ -10,7 +10,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <errno.h>
 #include <libmemcached/memcached.h>
+#include <sys/shm.h>
 #include <sys/epoll.h>
 #include <fcgi_stdio.h>
 #include <syslog.h>
@@ -45,18 +48,27 @@
 #define UID_COOKIE "uid"
 #define UID_LENGTH 50
 #define MAX_COOKIES 50
+#define ACTION_CONNECT 1
+#define ACTION_UNKNOWN 2
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
     //struct declarations
+	struct fcgircd_shared {
+		int parent_exited;
+		struct epoll_event events[MAX_EVENTS];
+	};
+
     struct fcgircd_state {
         unsigned char uid[UID_LENGTH+1];
         unsigned int connected;
+        unsigned int fd;
     };
     
     
     //Global vars
+    struct fcgircd_shared *shared;
     char *response_headers;
     int response_headers_sz;
     char *cookie_names[MAX_COOKIES];
@@ -64,13 +76,17 @@ extern "C" {
     int cookie_count;
     
     
-    //Function declartions
+    //Function declarations
+    void fcgircd_cleanup(int signal);
     struct fcgircd_state *populate_state_from_memcached(struct memcached_st *mem, char *uid);
     void save_state_to_memcached(struct memcached_st *mem, struct fcgircd_state *state);
     char *generate_uid(void);
     char *get_cookie(char *cookie_name);
     char *set_on_empty_identifier(void);
-    void init_epoll(int *epfd, struct epoll_event **events);
+    int get_action(char *input_data);
+    int do_action_connect(char *input_data, struct fcgircd_state *state);
+    void init_epoll(int *epfd);
+    void init_shared_mem(void);
     void init_cookies(void);
     void free_cookies(void);
     void set_content_type(char *content_type);
